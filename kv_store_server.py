@@ -15,123 +15,16 @@ import sys
 
 
 class KeyValueStore:
-    """Thread-safe persistent key-value store with Write-Ahead Log (WAL)"""
+    """Thread-safe in-memory key-value store"""
     
-    def __init__(self, data_file: str = 'kvstore.db', batch_size: int = 500, flush_interval: float = 2.0):
+    def __init__(self):
         self.store: dict[str, Any] = {}
         self.lock = threading.Lock()
-        self.data_file = data_file
-        self.log_file = data_file + '.log'
-        self.snapshot_file = data_file + '.snapshot'
-        self.batch_size = batch_size
-        self.flush_interval = flush_interval
-        self.pending_writes = 0
-        self.log_entries = 0
-        self.max_log_entries = 10000  # Snapshot after this many log entries
-        self._load_from_disk()
-        
-        # Start background flush thread
-        self.flush_thread = threading.Thread(target=self._flush_worker, daemon=True)
-        self.flush_thread.start()
-    
-    def _flush_worker(self):
-        """Background thread that periodically flushes log to disk"""
-        while True:
-            time.sleep(self.flush_interval)
-            with self.lock:
-                if self.pending_writes > 0:
-                    self._flush_log()
-                    self.pending_writes = 0
-                
-                # Create snapshot if log is getting too large
-                if self.log_entries >= self.max_log_entries:
-                    self._create_snapshot()
-    
-    def _load_from_disk(self):
-        """Load data from snapshot and replay log"""
-        # Load snapshot if exists
-        if os.path.exists(self.snapshot_file):
-            try:
-                with open(self.snapshot_file, 'r') as f:
-                    self.store = json.load(f)
-                print(f"Loaded snapshot with {len(self.store)} keys from {self.snapshot_file}")
-            except Exception as e:
-                print(f"Error loading snapshot: {e}")
-                self.store = {}
-        
-        # Replay log file
-        if os.path.exists(self.log_file):
-            try:
-                with open(self.log_file, 'r') as f:
-                    for line in f:
-                        line = line.strip()
-                        if not line:
-                            continue
-                        entry = json.loads(line)
-                        if entry['op'] == 'SET':
-                            self.store[entry['key']] = entry['value']
-                        elif entry['op'] == 'DELETE':
-                            self.store.pop(entry['key'], None)
-                        self.log_entries += 1
-                print(f"Replayed {self.log_entries} log entries")
-            except Exception as e:
-                print(f"Error loading log: {e}")
-    
-    def _save_to_disk(self):
-        """Save data to disk"""
-        pass  # Not used with WAL
-    
-    def _append_to_log(self, operation: str, key: str, value: Any = None):
-        """Append operation to write-ahead log"""
-        try:
-            entry = {'op': operation, 'key': key}
-            if operation == 'SET':
-                entry['value'] = value
-            
-            with open(self.log_file, 'a') as f:
-                f.write(json.dumps(entry) + '\n')
-            self.log_entries += 1
-        except Exception as e:
-            print(f"Error appending to log: {e}")
-    
-    def _flush_log(self):
-        """Flush log to disk (already appended, just sync)"""
-        try:
-            # Force OS to write to disk
-            with open(self.log_file, 'a') as f:
-                f.flush()
-                os.fsync(f.fileno())
-        except Exception as e:
-            print(f"Error flushing log: {e}")
-    
-    def _create_snapshot(self):
-        """Create a snapshot of current state and reset log"""
-        try:
-            # Write snapshot
-            temp_file = self.snapshot_file + '.tmp'
-            with open(temp_file, 'w') as f:
-                json.dump(self.store, f)
-            os.replace(temp_file, self.snapshot_file)
-            
-            # Clear log
-            open(self.log_file, 'w').close()
-            self.log_entries = 0
-            print(f"Created snapshot with {len(self.store)} keys")
-        except Exception as e:
-            print(f"Error creating snapshot: {e}")
     
     def set(self, key: str, value: Any) -> dict:
         """Set a key-value pair"""
         with self.lock:
             self.store[key] = value
-            self._append_to_log('SET', key, value)
-            self.pending_writes += 1
-            
-            # Flush if batch size reached
-            if self.pending_writes >= self.batch_size:
-                self._flush_log()
-                self.pending_writes = 0
-            
             return {"status": "OK"}
     
     def get(self, key: str) -> Optional[Any]:
@@ -144,14 +37,6 @@ class KeyValueStore:
         with self.lock:
             if key in self.store:
                 del self.store[key]
-                self._append_to_log('DELETE', key)
-                self.pending_writes += 1
-                
-                # Flush if batch size reached
-                if self.pending_writes >= self.batch_size:
-                    self._flush_log()
-                    self.pending_writes = 0
-                
                 return {"status": "OK"}
             else:
                 return {"status": "ERROR"}
@@ -248,12 +133,10 @@ class TCPServer:
                 return json.dumps(result)
             
             elif cmd == "FLUSH":
-                self.kv_store._flush_log()
-                return json.dumps({"status": "OK", "message": "Log flushed"})
+                return json.dumps({"status": "OK", "message": "No persistence enabled"})
             
             elif cmd == "SNAPSHOT":
-                self.kv_store._create_snapshot()
-                return json.dumps({"status": "OK", "message": "Snapshot created"})
+                return json.dumps({"status": "OK", "message": "No persistence enabled"})
             
             elif cmd == "PING":
                 return json.dumps({"status": "OK", "message": "PONG"})
