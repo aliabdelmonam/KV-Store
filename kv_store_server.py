@@ -10,6 +10,7 @@ from typing import Any, Optional
 import json
 import os
 import threading
+import time
 import uvicorn
 import signal
 import sys
@@ -27,13 +28,30 @@ class KeyRequest(BaseModel):
 
 
 class KeyValueStore:
-    """Thread-safe persistent key-value store"""
+    """Thread-safe persistent key-value store with batched writes"""
     
-    def __init__(self, data_file: str = 'kvstore.db'):
+    def __init__(self, data_file: str = 'kvstore.db', batch_size: int = 100, flush_interval: float = 1.0):
         self.store: dict[str, Any] = {}
         self.lock = threading.Lock()
         self.data_file = data_file
+        self.batch_size = batch_size
+        self.flush_interval = flush_interval
+        self.pending_writes = 0
+        self.dirty = False
         self._load_from_disk()
+        
+        # Start background flush thread
+        self.flush_thread = threading.Thread(target=self._flush_worker, daemon=True)
+        self.flush_thread.start()
+    
+    def _flush_worker(self):
+        """Background thread that periodically flushes data to disk"""
+        while True:
+            time.sleep(self.flush_interval)
+            with self.lock:
+                if self.dirty:
+                    self._save_to_disk()
+                    self.dirty = False
     
     def _load_from_disk(self):
         """Load data from disk on startup"""
@@ -63,7 +81,15 @@ class KeyValueStore:
         """Set a key-value pair"""
         with self.lock:
             self.store[key] = value
-            self._save_to_disk()
+            self.pending_writes += 1
+            self.dirty = True
+            
+            # Flush if batch size reached
+            if self.pending_writes >= self.batch_size:
+                self._save_to_disk()
+                self.pending_writes = 0
+                self.dirty = False
+            
             return {"status": "OK", "message": f"Key '{key}' set successfully"}
     
     def get(self, key: str) -> dict:
@@ -79,7 +105,15 @@ class KeyValueStore:
         with self.lock:
             if key in self.store:
                 del self.store[key]
-                self._save_to_disk()
+                self.pending_writes += 1
+                self.dirty = True
+                
+                # Flush if batch size reached
+                if self.pending_writes >= self.batch_size:
+                    self._save_to_disk()
+                    self.pending_writes = 0
+                    self.dirty = False
+                
                 return {"status": "OK", "message": f"Key '{key}' deleted successfully"}
             else:
                 return {"status": "ERROR", "message": f"Key '{key}' not found"}
@@ -102,8 +136,10 @@ def root():
         "message": "Key-Value Store API",
         "endpoints": {
             "set": "POST /set",
-            "get": "POST /get or GET /get/{key}",
-            "delete": "POST /delete or DELETE /delete/{key}"
+            "get": "GET /get/{key}",
+            "delete": "DELETE /delete/{key}",
+            "flush": "POST /flush",
+            "shutdown": "POST /shutdown"
         }
     }
 
@@ -147,6 +183,23 @@ def delete_value_path(key: str):
     if result["status"] == "ERROR":
         raise HTTPException(status_code=404, detail=result["message"])
     return result
+
+
+@app.post("/flush")
+def flush_data():
+    """
+    Force flush all pending writes to disk
+    
+    Example: POST /flush
+    """
+    with kv_store.lock:
+        if kv_store.dirty:
+            kv_store._save_to_disk()
+            kv_store.pending_writes = 0
+            kv_store.dirty = False
+            return {"message": f"Flushed {kv_store.pending_writes} pending writes to disk"}
+        else:
+            return {"message": "No pending writes to flush"}
 
 
 @app.post("/shutdown")
