@@ -1,20 +1,31 @@
 #!/usr/bin/env python3
 """
 Benchmark script for key-value store write performance
-Tests write operations per second with varying store sizes
+Tests write operations per second with varying store sizes via TCP
 """
 
-import requests
+import socket
+import json
 import time
 import statistics
-from typing import List, Tuple
-import json
+from typing import Tuple
 
-BASE_URL = "http://localhost:8000"
-NUM_ITERATIONS = 10  # Number of write operations per test
+HOST = "localhost"
+PORT = 6379
 
 
-def measure_writes(num_existing_keys: int, num_writes: int) -> Tuple[float, float, float]:
+def send_command(sock: socket.socket, command: str) -> bool:
+    """Send a command and check if successful"""
+    try:
+        sock.send(command.encode('utf-8') + b'\n')
+        response = sock.recv(4096).decode('utf-8').strip()
+        resp_obj = json.loads(response)
+        return resp_obj.get("status") == "OK"
+    except:
+        return False
+
+
+def measure_writes(num_existing_keys: int, num_writes: int) -> Tuple[float, float, float, float]:
     """
     Measure write performance
     
@@ -23,16 +34,17 @@ def measure_writes(num_existing_keys: int, num_writes: int) -> Tuple[float, floa
         num_writes: Number of write operations to perform
     
     Returns:
-        Tuple of (writes_per_second, min_time, max_time)
+        Tuple of (writes_per_second, min_time, max_time, avg_time)
     """
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((HOST, PORT))
+    
     # Pre-populate the store with existing keys
     if num_existing_keys > 0:
         print(f"  Pre-populating store with {num_existing_keys} keys...", end="", flush=True)
         for i in range(num_existing_keys):
-            requests.post(f"{BASE_URL}/set", json={
-                "key": f"existing_key_{i}",
-                "value": f"value_{i}"
-            })
+            command = f'SET existing_key_{i} "value_{i}"'
+            send_command(sock, command)
         print(" Done")
     
     # Measure write performance
@@ -41,18 +53,18 @@ def measure_writes(num_existing_keys: int, num_writes: int) -> Tuple[float, floa
     
     for i in range(num_writes):
         start = time.perf_counter()
-        response = requests.post(f"{BASE_URL}/set", json={
-            "key": f"bench_key_{num_existing_keys}_{i}",
-            "value": f"benchmark_value_{i}"
-        })
+        command = f'SET bench_key_{num_existing_keys}_{i} "benchmark_value_{i}"'
+        success = send_command(sock, command)
         end = time.perf_counter()
         
-        if response.status_code == 200:
+        if success:
             write_times.append((end - start) * 1000)  # Convert to ms
         else:
-            print(f"\nError: {response.status_code}")
-            return 0, 0, 0
+            print(f"\nError during write")
+            sock.close()
+            return 0, 0, 0, 0
     
+    sock.close()
     print(" Done")
     
     # Calculate statistics
@@ -69,16 +81,16 @@ def run_benchmark():
     """Run the complete benchmark suite"""
     
     print("\n" + "="*70)
-    print("Key-Value Store Write Performance Benchmark")
+    print("Key-Value Store Write Performance Benchmark (TCP)")
     print("="*70)
     
     # Test with increasing store sizes
     test_cases = [
-        (0, 10),      # 0 existing keys, 10 writes
-        (100, 10),    # 100 existing keys, 10 writes
-        (1000, 10),   # 1000 existing keys, 10 writes
-        (5000, 10),   # 5000 existing keys, 10 writes
-        (10000, 10),  # 10000 existing keys, 10 writes
+        (0, 500),      # 0 existing keys, 500 writes
+        (100, 500),    # 100 existing keys, 500 writes
+        (1000, 500),   # 1000 existing keys, 500 writes
+        (5000, 500),   # 5000 existing keys, 500 writes
+        (10000, 500),  # 10000 existing keys, 500 writes
     ]
     
     results = []
@@ -95,8 +107,8 @@ def run_benchmark():
                 "avg_time_ms": avg_time
             })
             print(f"  Writes/sec: {writes_per_sec:.2f}")
-            print(f"  Avg time: {avg_time:.2f}ms")
-            print(f"  Min time: {min_time:.2f}ms, Max time: {max_time:.2f}ms")
+            print(f"  Avg time: {avg_time:.4f}ms")
+            print(f"  Min time: {min_time:.4f}ms, Max time: {max_time:.4f}ms")
         except Exception as e:
             print(f"  Error: {e}")
             return
@@ -108,7 +120,7 @@ def run_benchmark():
     print(f"{'Existing Keys':<20} {'Writes/sec':<20} {'Avg Time (ms)':<20}")
     print("-"*70)
     for result in results:
-        print(f"{result['existing_keys']:<20} {result['writes_per_second']:<20.2f} {result['avg_time_ms']:<20.2f}")
+        print(f"{result['existing_keys']:<20} {result['writes_per_second']:<20.2f} {result['avg_time_ms']:<20.4f}")
     
     # Save results to file
     with open("benchmark_results.json", "w") as f:
@@ -131,12 +143,11 @@ if __name__ == "__main__":
     
     # Check if server is running
     try:
-        response = requests.get(f"{BASE_URL}/")
-        if response.status_code != 200:
-            print("Error: Server is not responding correctly")
-            sys.exit(1)
-    except requests.exceptions.ConnectionError:
-        print("Error: Cannot connect to server at " + BASE_URL)
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((HOST, PORT))
+        sock.close()
+    except ConnectionRefusedError:
+        print("Error: Cannot connect to server at " + f"{HOST}:{PORT}")
         print("Please start the server first: python kv_store_server.py")
         sys.exit(1)
     
