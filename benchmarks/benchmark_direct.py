@@ -71,7 +71,7 @@ def run_benchmark():
         print(f"\nBenchmark: {existing_keys} existing keys")
         
         # Create fresh store for each test
-        store = KeyValueStore(data_file=f'kvstore_bench_{existing_keys}.db')
+        store = KeyValueStore()
         
         # Pre-populate the store with existing keys
         if existing_keys > 0:
