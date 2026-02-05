@@ -1,0 +1,59 @@
+
+======================================================================
+Key-Value Store Write Performance Benchmark (TCP)   
+======================================================================
+
+Benchmark: 0 existing keys
+  Measuring 500 write operations... Done
+  Writes/sec: 7628.85
+  Avg time: 0.1311ms
+  Min time: 0.0955ms, Max time: 0.5634ms
+
+Benchmark: 100 existing keys
+  Pre-populating store with 100 keys... Done        
+  Measuring 500 write operations... Done
+  Writes/sec: 7642.00
+  Avg time: 0.1309ms
+  Min time: 0.0999ms, Max time: 0.3456ms
+
+Benchmark: 1000 existing keys
+  Pre-populating store with 1000 keys... Done
+  Measuring 500 write operations... Done
+  Writes/sec: 7699.68
+  Avg time: 0.1299ms
+  Min time: 0.1006ms, Max time: 0.4716ms
+
+Benchmark: 5000 existing keys
+  Pre-populating store with 5000 keys... Done
+  Measuring 500 write operations... Done
+  Writes/sec: 7263.43
+  Avg time: 0.1377ms
+  Min time: 0.0983ms, Max time: 0.5653ms
+
+Benchmark: 10000 existing keys
+  Pre-populating store with 10000 keys... Done
+  Measuring 500 write operations... Done
+  Writes/sec: 6020.70
+  Avg time: 0.1661ms
+  Min time: 0.1442ms, Max time: 0.3957ms
+
+======================================================================
+Summary
+======================================================================
+Existing Keys        Writes/sec           Avg Time (ms)
+----------------------------------------------------------------------
+0                    7628.85              0.1311
+100                  7642.00              0.1309
+1000                 7699.68              0.1299
+5000                 7263.43              0.1377
+10000                6020.70              0.1661
+
+Results saved to benchmark_results.json
+
+======================================================================
+Performance Degradation Analysis
+======================================================================
+With   100 keys:  -0.17% slower than baseline
+With  1000 keys:  -0.93% slower than baseline
+With  5000 keys:   4.79% slower than baseline
+With 10000 keys:  21.08% slower than baseline

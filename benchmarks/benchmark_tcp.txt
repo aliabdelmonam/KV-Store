@@ -1,0 +1,57 @@
+
+======================================================================
+TCP Client Performance Benchmark
+======================================================================
+
+Benchmark: 0 existing keys
+  Measuring 500 write operations via TCP... Done
+  Writes/sec: 5007.89
+  Avg time: 0.1997ms
+  Min time: 0.0974ms, Max time: 23.3402ms
+
+Benchmark: 100 existing keys
+  Pre-populating store with 100 keys... Done
+  Measuring 500 write operations via TCP... Done
+  Writes/sec: 7126.04
+  Avg time: 0.1403ms
+  Min time: 0.0970ms, Max time: 0.6551ms
+
+Benchmark: 1000 existing keys
+  Pre-populating store with 1000 keys... Done
+  Measuring 500 write operations via TCP... Done
+  Writes/sec: 7146.84
+  Avg time: 0.1399ms
+  Min time: 0.0971ms, Max time: 0.5584ms
+
+Benchmark: 5000 existing keys
+  Pre-populating store with 5000 keys... Done
+  Measuring 500 write operations via TCP... Done
+  Writes/sec: 7565.26
+  Avg time: 0.1322ms
+  Min time: 0.0872ms, Max time: 0.8672ms
+
+Benchmark: 10000 existing keys
+  Pre-populating store with 10000 keys... Done
+  Measuring 500 write operations via TCP... Done
+  Writes/sec: 7812.73
+  Avg time: 0.1280ms
+  Min time: 0.0941ms, Max time: 0.6024ms
+
+======================================================================
+Summary - TCP Performance
+======================================================================
+Existing Keys        Writes/sec           Avg Time (ms)
+----------------------------------------------------------------------
+0                    5007.89              0.1997
+100                  7126.04              0.1403
+1000                 7146.84              0.1399
+5000                 7565.26              0.1322
+10000                7812.73              0.1280
+
+======================================================================
+Performance Degradation Analysis
+======================================================================
+With   100 keys: -42.30% slower than baseline
+With  1000 keys: -42.71% slower than baseline
+With  5000 keys: -51.07% slower than baseline
+With 10000 keys: -56.01% slower than baseline

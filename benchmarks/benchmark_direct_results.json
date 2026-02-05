@@ -1,0 +1,37 @@
+[
+  {
+    "existing_keys": 0,
+    "writes_per_second": 373720.0533779846,
+    "min_time_ms": 0.0016999983927235007,
+    "max_time_ms": 0.11039999662898481,
+    "avg_time_ms": 0.002675799682037905
+  },
+  {
+    "existing_keys": 100,
+    "writes_per_second": 743715.6387230487,
+    "min_time_ms": 0.0011999945854768157,
+    "max_time_ms": 0.008100003469735384,
+    "avg_time_ms": 0.0013445999356918037
+  },
+  {
+    "existing_keys": 1000,
+    "writes_per_second": 865800.7963160147,
+    "min_time_ms": 0.0006999907782301307,
+    "max_time_ms": 0.04909999552182853,
+    "avg_time_ms": 0.0011550000926945359
+  },
+  {
+    "existing_keys": 5000,
+    "writes_per_second": 410138.60770824377,
+    "min_time_ms": 0.0011999945854768157,
+    "max_time_ms": 0.22170000011101365,
+    "avg_time_ms": 0.0024382001138292253
+  },
+  {
+    "existing_keys": 10000,
+    "writes_per_second": 871231.959465802,
+    "min_time_ms": 0.0007999915396794677,
+    "max_time_ms": 0.016200006939470768,
+    "avg_time_ms": 0.0011477999505586922
+  }
+]

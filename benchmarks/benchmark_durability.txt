@@ -1,0 +1,162 @@
+
+======================================================================
+Running 5 Durability Tests
+======================================================================
+
+[Test 1/5]
+
+======================================================================
+Durability Test
+======================================================================
+Testing with 1000 write operations
+Server will be killed at random point during writes
+
+Starting server...
+Server will be killed after write #689/1000
+
+Sending writes... [KILL]SUCCESS: The process with PID 20644 has been terminated.
+  Force-killed server (PID: 20644)
+ Done (1.814s)
+Successful writes before kill: 690
+Total writes with OK status: 690
+
+Restarting server...
+
+Verifying persisted writes...
+
+======================================================================
+DURABILITY TEST RESULTS
+======================================================================
+Total successful writes (got OK): 690
+Persisted after restart: 0
+Lost writes: 690
+Data loss rate: 100.00%
+======================================================================
+
+Lost writes at indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] ... and 670 more
+
+[Test 2/5]
+
+======================================================================
+Durability Test
+======================================================================
+Testing with 1000 write operations
+Server will be killed at random point during writes
+
+Starting server...
+Server will be killed after write #877/1000
+
+Sending writes... [KILL]SUCCESS: The process with PID 3560 has been terminated.
+  Force-killed server (PID: 3560)
+ Done (1.539s)
+Successful writes before kill: 878
+Total writes with OK status: 878
+
+Restarting server...
+
+Verifying persisted writes...
+
+======================================================================
+DURABILITY TEST RESULTS
+======================================================================
+Total successful writes (got OK): 878
+Persisted after restart: 878
+Lost writes: 0
+Data loss rate: 0.00%
+======================================================================
+
+[Test 3/5]
+
+======================================================================
+Durability Test
+======================================================================
+Testing with 1000 write operations
+Server will be killed at random point during writes
+
+Starting server...
+Server will be killed after write #677/1000
+
+Sending writes... [KILL]SUCCESS: The process with PID 28376 has been terminated.
+  Force-killed server (PID: 28376)
+ Done (1.578s)
+Successful writes before kill: 678
+Total writes with OK status: 678
+
+Restarting server...
+
+Verifying persisted writes...
+
+======================================================================
+DURABILITY TEST RESULTS
+======================================================================
+Total successful writes (got OK): 678
+Persisted after restart: 678
+Lost writes: 0
+Data loss rate: 0.00%
+======================================================================
+
+[Test 4/5]
+
+======================================================================
+Durability Test
+======================================================================
+Testing with 1000 write operations
+Server will be killed at random point during writes
+
+Starting server...
+Server will be killed after write #657/1000
+
+Sending writes... [KILL]SUCCESS: The process with PID 28348 has been terminated.
+  Force-killed server (PID: 28348)
+ Done (1.660s)
+Successful writes before kill: 658
+Total writes with OK status: 658
+
+Restarting server...
+
+Verifying persisted writes...
+
+======================================================================
+DURABILITY TEST RESULTS
+======================================================================
+Total successful writes (got OK): 658
+Persisted after restart: 658
+Lost writes: 0
+Data loss rate: 0.00%
+======================================================================
+
+[Test 5/5]
+
+======================================================================
+Durability Test
+======================================================================
+Testing with 1000 write operations
+Server will be killed at random point during writes
+
+Starting server...
+Server will be killed after write #308/1000
+
+Sending writes... [KILL]SUCCESS: The process with PID 26672 has been terminated.
+  Force-killed server (PID: 26672)
+ Done (1.720s)
+Successful writes before kill: 309
+Total writes with OK status: 309
+
+Restarting server...
+
+Verifying persisted writes...
+
+======================================================================
+DURABILITY TEST RESULTS
+======================================================================
+Total successful writes (got OK): 309
+Persisted after restart: 0
+Lost writes: 309
+Data loss rate: 100.00%
+======================================================================
+
+Lost writes at indices: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] ... and 289 more
+
+======================================================================
+All durability tests completed
+======================================================================

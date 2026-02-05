@@ -1,0 +1,57 @@
+======================================================================
+Direct KeyValueStore Performance Benchmark (No HTTP)
+======================================================================
+Benchmark: 0 existing keys
+  Measuring 500 write operations... Done
+  Writes/sec: 373720.05
+  Avg time: 0.00ms                                              
+  Min time: 0.00ms, Max time: 0.11ms
+
+Benchmark: 100 existing keys                                   
+  Pre-populating store with 100 keys... Done                    
+  Measuring 500 write operations... Done                        
+  Writes/sec: 743715.64
+  Avg time: 0.00ms
+  Min time: 0.00ms, Max time: 0.01ms
+
+Benchmark: 1000 existing keys
+  Pre-populating store with 1000 keys... Done
+  Measuring 500 write operations... Done
+  Writes/sec: 865800.80
+  Avg time: 0.00ms
+  Min time: 0.00ms, Max time: 0.05ms
+
+Benchmark: 5000 existing keys
+  Pre-populating store with 5000 keys... Done
+  Measuring 500 write operations... Done
+  Writes/sec: 410138.61
+  Avg time: 0.00ms
+  Min time: 0.00ms, Max time: 0.22ms
+
+Benchmark: 10000 existing keys
+  Pre-populating store with 10000 keys... Done
+  Measuring 500 write operations... Done
+  Writes/sec: 871231.96
+  Avg time: 0.00ms
+  Min time: 0.00ms, Max time: 0.02ms
+
+======================================================================
+Summary - Direct Performance (No HTTP Overhead)
+======================================================================
+Existing Keys        Writes/sec           Avg Time (ms)
+----------------------------------------------------------------------
+0                    373720.05            0.0027
+100                  743715.64            0.0013
+1000                 865800.80            0.0012
+5000                 410138.61            0.0024
+10000                871231.96            0.0011
+
+Results saved to benchmark_direct_results.json
+
+======================================================================
+Performance Degradation Analysis
+======================================================================
+With   100 keys: -99.00% slower than baseline
+With  1000 keys: -131.67% slower than baseline
+With  5000 keys:  -9.74% slower than baseline
+With 10000 keys: -133.12% slower than baseline
